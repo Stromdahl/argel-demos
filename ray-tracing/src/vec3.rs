@@ -1,16 +1,16 @@
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vec3 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 impl Vec3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3 { x, y, z }
     }
 
-    pub fn unit(v: Self) -> Self {
+    pub fn normalized(v: Self) -> Self {
         let magnitude = v.magnitude();
         if magnitude == 0.0 {
             return v;
@@ -18,70 +18,90 @@ impl Vec3 {
         v / magnitude
     }
 
-    pub fn magnitude_squared(&self) -> f32 {
-        self.x * self.x + self.y * self.y + self.z * self.z
+    pub fn x(self) -> f64 {
+        self.x
     }
 
-    pub fn magnitude(&self) -> f32 {
-        self.magnitude_squared().sqrt()
+    pub fn y(self) -> f64 {
+        self.y
+    }
+
+    pub fn z(self) -> f64 {
+        self.z
+    }
+
+    pub fn dot(self, other: Self) -> f64 {
+        self.x * other.x + self.y * other.y + self.z * other.z
+    }
+
+    pub fn cross(self, other: Self) -> Self {
+        Self {
+            x: self.y * other.z - self.z * other.y,
+            y: self.z * other.x - self.x * other.z,
+            z: self.x * other.y - self.y * other.x,
+        }
+    }
+
+    pub fn magnitude(self) -> f64 {
+        self.dot(self).sqrt()
     }
 }
 
 impl std::ops::Add for Vec3 {
     type Output = Self;
-    fn add(self, rhs: Self) -> Self {
+    fn add(self, other: Self) -> Self {
         Self {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.z,
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
         }
     }
 }
 
 impl std::ops::Sub for Vec3 {
     type Output = Self;
-    fn sub(self, rhs: Self) -> Self {
+    fn sub(self, other: Self) -> Self {
         Self {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-            z: self.z - rhs.z,
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
         }
     }
 }
 
 impl std::ops::Mul for Vec3 {
     type Output = Self;
-    fn mul(self, rhs: Self) -> Self {
+    fn mul(self, other: Self) -> Self {
         Self {
-            x: self.x * rhs.x,
-            y: self.y * rhs.y,
-            z: self.z * rhs.z,
+            x: self.x * other.x,
+            y: self.y * other.y,
+            z: self.z * other.z,
         }
     }
 }
 
-impl std::ops::Mul<f32> for Vec3 {
+impl std::ops::Mul<f64> for Vec3 {
     type Output = Self;
-    fn mul(self, rhs: f32) -> Self {
+    fn mul(self, other: f64) -> Self {
         Self {
-            x: self.x * rhs,
-            y: self.y * rhs,
-            z: self.z * rhs,
+            x: self.x * other,
+            y: self.y * other,
+            z: self.z * other,
         }
     }
 }
 
-impl std::ops::Mul<Vec3> for f32 {
+impl std::ops::Mul<Vec3> for f64 {
     type Output = Vec3;
-    fn mul(self, rhs: Vec3) -> Vec3 {
-        Vec3::new(self * rhs.x, self * rhs.y, self * rhs.z)
+    fn mul(self, other: Vec3) -> Vec3 {
+        Vec3::new(self * other.x, self * other.y, self * other.z)
     }
 }
 
-impl std::ops::Div<f32> for Vec3 {
+impl std::ops::Div<f64> for Vec3 {
     type Output = Self;
-    fn div(self, rhs: f32) -> Self {
-        (1.0 / rhs) * self
+    fn div(self, other: f64) -> Self {
+        (1.0 / other) * self
     }
 }
 
@@ -92,7 +112,7 @@ mod tests {
     #[test]
     fn test_unit() {
         let a = Vec3::new(2.0, 2.0, 2.0);
-        let a_unit = Vec3::unit(a.clone());
+        let a_unit = Vec3::normalized(a.clone());
         let a_mag = a.magnitude();
 
         assert!(
@@ -104,7 +124,7 @@ mod tests {
             "Assert that the normalized vector is equal to the original vector divided by its magnitude"); 
 
         let a = Vec3::new(0.0, 0.0, 0.0);
-        let a_unit = Vec3::unit(a);
+        let a_unit = Vec3::normalized(a);
         assert_eq!(
             a_unit,
             Vec3::new(0.0, 0.0, 0.0),
