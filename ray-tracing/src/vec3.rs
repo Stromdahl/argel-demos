@@ -83,6 +83,16 @@ impl std::ops::Mul for Vec3 {
     }
 }
 
+impl std::ops::MulAssign<f64> for Vec3 {
+    fn mul_assign(&mut self, other: f64) -> () {
+        *self = Vec3 {
+            x: self.x * other,
+            y: self.y * other,
+            z: self.z * other,
+        };
+    }
+}
+
 impl std::ops::Mul<f64> for Vec3 {
     type Output = Self;
     fn mul(self, other: f64) -> Self {
@@ -110,7 +120,7 @@ impl std::ops::Div<f64> for Vec3 {
 
 #[cfg(test)]
 mod tests {
-    use crate::Vec3;
+    use crate::vec3::Vec3;
 
     #[test]
     fn test_unit() {
