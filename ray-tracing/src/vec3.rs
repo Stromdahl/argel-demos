@@ -5,6 +5,9 @@ pub struct Vec3 {
     pub z: f64,
 }
 
+pub type Color = Vec3;
+pub type Point3 = Vec3;
+
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3 { x, y, z }
