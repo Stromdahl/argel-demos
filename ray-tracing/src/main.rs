@@ -9,24 +9,16 @@ use hittable::{Hittable, World};
 use std::time::Instant;
 use vec3::{Color, Point3};
 
+const ASPECT_RATIO: f64 = 16.0 / 9.0;
+const IMAGE_WIDTH: usize = 600;
+const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
+const IMAGE_PATH: &str = "image.ppm";
+
 fn vec3_to_color(color: Color) -> u32 {
     let ir = (255.999 * color.x()) as u8;
     let ig = (255.999 * color.y()) as u8;
     let ib = (255.999 * color.z()) as u8;
     (ir as u32) << 16 | (ig as u32) << 8 | ib as u32
-}
-
-fn hit_sphere(center: Point3, radius: f64, r: &ray::Ray) -> f64 {
-    let oc = r.origin() - center;
-    let a = r.direction().magnitude().powi(2);
-    let half_b = oc.dot(r.direction());
-    let c = oc.magnitude().powi(2) - radius.powi(2);
-    let discriminant = half_b.powi(2) - a * c;
-
-    if discriminant < 0.0 {
-        return -1.0;
-    }
-    return (-half_b - discriminant.sqrt()) / a;
 }
 
 fn ray_color(r: &ray::Ray, world: &World) -> Color {
@@ -39,10 +31,6 @@ fn ray_color(r: &ray::Ray, world: &World) -> Color {
 }
 
 fn main() {
-    const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: usize = 400;
-    const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-    const IMAGE_PATH: &str = "image.ppm";
     let mut canvas = Canvas::new(IMAGE_WIDTH, IMAGE_HEIGHT);
 
     // World

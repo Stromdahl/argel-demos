@@ -21,8 +21,8 @@ impl Hittable for Sphere {
         let a = r.direction().magnitude().powi(2);
         let half_b = oc.dot(r.direction());
         let c = oc.magnitude().powi(2) - self.radius.powi(2);
-        let discriminant = half_b.powi(2) - a * c;
 
+        let discriminant = half_b.powi(2) - a * c;
         if discriminant < 0.0 {
             return None;
         }
@@ -31,6 +31,9 @@ impl Hittable for Sphere {
         let mut root = (-half_b - sqrtd) / a;
         if root < t_min || t_max < root {
             root = (-half_b + sqrtd) / a;
+            if root < t_min || t_max < root {
+                return None;
+            }
         }
 
         let p = r.at(root);
