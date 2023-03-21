@@ -27,14 +27,15 @@ pub type World = Vec<Box<dyn Hittable>>;
 
 impl Hittable for World {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        let mut hit_record = None;
         let mut closest_so_far = t_max;
-        let mut hit_anything = None;
+
         for object in self {
             if let Some(rec) = object.hit(ray, t_min, closest_so_far) {
                 closest_so_far = rec.t;
-                hit_anything = Some(rec);
+                hit_record = Some(rec);
             }
         }
-        hit_anything
+        hit_record
     }
 }

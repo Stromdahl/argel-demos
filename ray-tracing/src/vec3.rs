@@ -14,7 +14,7 @@ impl Vec3 {
     }
 
     pub fn normalized(v: Self) -> Self {
-        let magnitude = v.magnitude();
+        let magnitude = v.length();
         if magnitude == 0.0 {
             return v;
         }
@@ -45,7 +45,7 @@ impl Vec3 {
         }
     }
 
-    pub fn magnitude(self) -> f64 {
+    pub fn length(self) -> f64 {
         self.dot(self).sqrt()
     }
 }
@@ -126,14 +126,14 @@ mod tests {
     fn test_unit() {
         let a = Vec3::new(2.0, 2.0, 2.0);
         let a_unit = Vec3::normalized(a.clone());
-        let a_mag = a.magnitude();
+        let a_mag = a.length();
 
         assert!(
-            a_unit.magnitude().abs() - 1.0 < 1e-6,
+            a_unit.length().abs() - 1.0 < 1e-6,
             "Assert that the magnitude of the unit vector is close to 1"
         );
         assert!(
-            (a_unit - a / a_mag).magnitude() < 1e-6,
+            (a_unit - a / a_mag).length() < 1e-6,
             "Assert that the normalized vector is equal to the original vector divided by its magnitude"); 
 
         let a = Vec3::new(0.0, 0.0, 0.0);
@@ -148,7 +148,7 @@ mod tests {
     #[test]
     fn test_magnitude() {
         let a = Vec3::new(3.0, 4.0, 12.0);
-        assert_eq!(a.magnitude(), 13.0);
+        assert_eq!(a.length(), 13.0);
     }
 
     #[test]
