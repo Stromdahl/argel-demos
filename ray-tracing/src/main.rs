@@ -9,19 +9,26 @@ use argel::output::save_ppm_image;
 use hittable::{Hittable, World};
 use rand::Rng;
 use std::time::Instant;
-use vec3::{Color, Point3};
+use vec3::{Color, Point3, Vec3};
 
 fn format_color(color: Color, samples_per_pixel: u64) -> u32 {
-    let ir = (256.0 * (color.x() / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u8;
-    let ig = (256.0 * (color.y() / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u8;
-    let ib = (256.0 * (color.z() / (samples_per_pixel as f64)).clamp(0.0, 0.999)) as u8;
+    let ir = (256.0 * (color.x() / (samples_per_pixel as f64)).sqrt().clamp(0.0, 0.999)) as u8;
+    let ig = (256.0 * (color.y() / (samples_per_pixel as f64)).sqrt().clamp(0.0, 0.999)) as u8;
+    let ib = (256.0 * (color.z() / (samples_per_pixel as f64)).sqrt().clamp(0.0, 0.999)) as u8;
     (ir as u32) << 16 | (ig as u32) << 8 | ib as u32
 }
 
-fn ray_color(r: &ray::Ray, world: &World) -> Color {
-    if let Some(rec) = world.hit(r, 0.0, std::f64::INFINITY) {
-        return 0.5 * rec.normal + Color::new(1.0, 1.0, 1.0);
+fn ray_color(r: &ray::Ray, world: &World, depth: u64) -> Color {
+    if depth <= 0 {
+        return Color::new(0.0, 0.0, 0.0);
     }
+
+    if let Some(rec) = world.hit(r, 0.0001, std::f64::INFINITY) {
+        let target = rec.p + Vec3::random_in_hemisphere(rec.normal);
+        let r = ray::Ray::new(rec.p, target - rec.p);
+        return 0.5 * ray_color(&r, world, depth - 1);
+    }
+
     let unit_direction = vec3::Vec3::normalized(r.direction());
     let t = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - t) * Color::new(1.0, 1.0, 1.0) + t * Color::new(0.5, 0.7, 1.0);
@@ -31,10 +38,11 @@ fn main() {
     const IMAGE_PATH: &str = "image.ppm";
 
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: usize = 256;
+    const IMAGE_WIDTH: usize = 720;
     const IMAGE_HEIGHT: usize = ((IMAGE_WIDTH as f64) / ASPECT_RATIO) as usize;
 
     const SAMPLES_PER_PIXEL: u64 = 10;
+    const MAX_DEPTH: u64 = 5;
 
     // World
     let mut world = World::new();
@@ -72,7 +80,7 @@ fn main() {
                 let v = ((j as f64) + random_v) / ((IMAGE_HEIGHT - 1) as f64);
 
                 let r = camera.get_ray(u, v);
-                pixel_color = pixel_color + ray_color(&r, &world);
+                pixel_color = pixel_color + ray_color(&r, &world, MAX_DEPTH);
             }
 
             canvas.pixels[j * IMAGE_WIDTH + i] = format_color(pixel_color, SAMPLES_PER_PIXEL);

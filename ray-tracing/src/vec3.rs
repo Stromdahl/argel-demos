@@ -1,3 +1,6 @@
+use rand::Rng;
+use std::ops::Range;
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vec3 {
     pub x: f64,
@@ -19,6 +22,33 @@ impl Vec3 {
             return v;
         }
         v / magnitude
+    }
+
+    pub fn random(r: Range<f64>) -> Self {
+        let mut rng = rand::thread_rng();
+
+        Self {
+            x: rng.gen_range(r.clone()),
+            y: rng.gen_range(r.clone()),
+            z: rng.gen_range(r.clone()),
+        }
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let v = Self::random(-1.0..1.0);
+            if v.length() < 1.0 {
+                return v;
+            }
+        }
+    }
+
+    pub fn random_in_hemisphere(normal: Self) -> Self {
+        let in_unit_sphere = Self::random_in_unit_sphere();
+        if in_unit_sphere.dot(normal) > 0.0 {
+            return in_unit_sphere;
+        }
+        return (-1.0) * in_unit_sphere;
     }
 
     pub fn x(self) -> f64 {
@@ -134,7 +164,7 @@ mod tests {
         );
         assert!(
             (a_unit - a / a_mag).length() < 1e-6,
-            "Assert that the normalized vector is equal to the original vector divided by its magnitude"); 
+            "Assert that the normalized vector is equal to the original vector divided by its magnitude");
 
         let a = Vec3::new(0.0, 0.0, 0.0);
         let a_unit = Vec3::normalized(a);
